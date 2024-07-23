@@ -4,32 +4,44 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 function Message({ audio, foto, initialPrompt }) {
   const [aiResponse, setAiResponse] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function sendToGemini() {
       if (!foto || !audio) return;
 
-      // Accede a tu clave de API desde una variable de entorno
       const apiKey = "AIzaSyBD3pwUuwobKmxw982w4UHgGSSEt3CcCQw";
       const genAI = new GoogleGenerativeAI(apiKey);
 
-      // Convierte la imagen y el audio a partes de GoogleGenerativeAI
-      const fileToGenerativePart = (dataUrl, mimeType) => ({
-        inlineData: {
-          data: dataUrl.split(",")[1],
-          mimeType,
-        },
-      });
+      const dataToBase64 = async (dataUrl) => {
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        return new Promise((resolve) => {
+          reader.onloadend = () => resolve(reader.result.split(",")[1]);
+          reader.readAsDataURL(blob);
+        });
+      };
 
-      const imagePart = fileToGenerativePart(foto, "image/png");
-      const audioPart = fileToGenerativePart(audio, "audio/webm");
+      const fileToGenerativePart = async (dataUrl, mimeType) => {
+        const base64Data = await dataToBase64(dataUrl);
+        return {
+          inlineData: {
+            data: base64Data,
+            mimeType,
+          },
+        };
+      };
 
       try {
+        const imagePart = await fileToGenerativePart(foto, "image/png");
+        const audioPart = await fileToGenerativePart(audio, "audio/webm");
+
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        // Usa el prompt recibido como prop
-        const prompt = initialPrompt || "Describe esta imagen y audio";
-        console.log(prompt);
+        const prompt =
+          initialPrompt || "Describe esta imagen y audio en español";
+        console.log("Prompt:", prompt);
 
         console.log("Enviando a Gemini datos");
         const result = await model.generateContent([
@@ -37,14 +49,17 @@ function Message({ audio, foto, initialPrompt }) {
           imagePart,
           audioPart,
         ]);
-        console.log("recibido");
+
+        console.log("Recibido");
         const response = await result.response;
         const text = await response.text();
-        console.log(text);
-        setAiResponse(text); // Guardar la respuesta de la IA en el estado
+        console.log("Respuesta de la IA:", text);
+        setAiResponse(text);
+        setError(null); // Limpiar cualquier error previo
       } catch (error) {
         console.error("Error al enviar a Gemini:", error);
-        setAiResponse("Error al obtener la respuesta de la IA.");
+        setError("Error al obtener la respuesta de la IA.");
+        setAiResponse(null); // Limpiar respuesta previa en caso de error
       }
     }
 
@@ -53,6 +68,7 @@ function Message({ audio, foto, initialPrompt }) {
 
   return (
     <div className='message'>
+      {error && <p className='error'>{error}</p>}
       {aiResponse ? (
         <div className='ai-response'>
           <h2>Foto capturada:</h2>
