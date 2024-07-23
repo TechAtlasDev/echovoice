@@ -4,11 +4,6 @@ import { VitePWA } from "vite-plugin-pwa";
 import fs from "fs";
 
 export default defineConfig({
-  server: {
-    https: false,
-    key: fs.readFileSync("192.168.116.41-key.pem"),
-    cert: fs.readFileSync("192.168.116.41.pem"),
-  },
   plugins: [
     react(),
     VitePWA({
