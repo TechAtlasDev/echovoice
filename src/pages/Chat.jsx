@@ -1,3 +1,4 @@
+// Chat.js
 import { useState, useRef } from "react";
 import Message from "../components/Chat/Message";
 
@@ -5,6 +6,11 @@ function Chat() {
   const [isMicActive, setIsMicActive] = useState(false);
   const [photoDataUrl, setPhotoDataUrl] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
+  const [aiResponse, setAiResponse] = useState(null);
+  const [initialPrompt, setInitialPrompt] = useState(
+    "Describe esta imagen y audio en español"
+  ); // Nuevo estado para el prompt
+
   const audioRef = useRef(null);
   const mediaRecorderRef = useRef(null);
 
@@ -15,6 +21,15 @@ function Chat() {
       const photo = await takePhoto();
       setPhotoDataUrl(photo);
       console.log("Foto tomada:", photo);
+
+      // Enviar datos a la IA y actualizar la respuesta
+      if (photo && audioBlob) {
+        const response = await sendToGemini(
+          photo,
+          URL.createObjectURL(audioBlob)
+        );
+        setAiResponse(response);
+      }
     } else {
       // Iniciar la grabación
       startRecording();
@@ -79,6 +94,18 @@ function Chat() {
     }
   }
 
+  const sendToGemini = async (foto, audio) => {
+    const response = await fetch("/api/gemini", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ foto, audio, prompt: initialPrompt }), // Enviar el prompt al servidor
+    });
+    const data = await response.json();
+    return data.text; // Devuelve el texto de la respuesta de la IA
+  };
+
   const microphone = (
     <svg
       color={isMicActive ? "white" : "black"}
@@ -100,7 +127,7 @@ function Chat() {
   );
 
   return (
-    <section className='flex lg:flex-row flex-col w-screen min-h-screen p-5 bg-black'>
+    <section className='flex lg:flex-row flex-col max-w-screen min-h-screen p-5 bg-black'>
       <div className='my-5 text-center'>
         <h1 className='font-bold text-3xl'>EchoVoice</h1>
       </div>
@@ -123,6 +150,7 @@ function Chat() {
         <Message
           audio={audioBlob ? URL.createObjectURL(audioBlob) : null}
           foto={photoDataUrl}
+          initialPrompt={initialPrompt} // Pasar el prompt inicial al componente Message
         />
       </section>
     </section>
