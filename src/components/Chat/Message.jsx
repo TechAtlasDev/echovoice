@@ -104,6 +104,8 @@ function Message({ audio, foto, initialPrompt }) {
           <img src={foto} alt='Captura' className='mb-4' />
           <h2>Respuesta de la IA:</h2>
           <p>{aiResponse}</p>
+          <h2>Audio capturado:</h2>
+          <audio src={audio} controls />
         </div>
       ) : (
         <p>Esperando la respuesta de la IA...</p>
