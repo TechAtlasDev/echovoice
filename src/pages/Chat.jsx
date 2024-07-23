@@ -127,13 +127,13 @@ function Chat() {
   );
 
   return (
-    <section className='flex lg:flex-row flex-col max-w-screen min-h-screen p-5 bg-black'>
+    <section className='flex flex-col max-w-screen min-h-screen p-5 bg-black'>
       <div className='my-5 text-center'>
         <h1 className='font-bold text-3xl'>EchoVision v2</h1>
       </div>
       <section className='flex flex-col justify-center items-center mb-10'>
         <button
-          className={`transition-all duration-200 bg-gray-100 rounded-full p-5 ${
+          className={`transition-all duration-200 bg-gray-100 rounded-full p-5 mb-2 ${
             isMicActive ? "bg-red-500 " : "bg-gray-100"
           }`}
           onClick={() => handleMicClick(0)}

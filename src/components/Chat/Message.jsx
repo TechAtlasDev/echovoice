@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { WaveFile } from "wavefile";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import WavEncoder from "wav-encoder";
 
 function Message({ audio, foto, initialPrompt }) {
   const [aiResponse, setAiResponse] = useState(null);
@@ -8,27 +8,28 @@ function Message({ audio, foto, initialPrompt }) {
 
   useEffect(() => {
     async function convertToWav(audioUrl) {
-      try {
-        const response = await fetch(audioUrl);
-        const arrayBuffer = await response.arrayBuffer();
-        const audioBlob = new Blob([arrayBuffer], { type: "audio/ogg" });
-        const audioContext = new (window.AudioContext ||
-          window.webkitAudioContext)();
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      // Descargar el archivo de audio desde la URL
+      const response = await fetch(audioUrl);
+      const arrayBuffer = await response.arrayBuffer();
 
-        const wav = new WaveFile();
-        wav.fromScratch(
-          audioBuffer.numberOfChannels,
-          audioBuffer.sampleRate,
-          "16",
-          audioBuffer.getChannelData(0)
-        );
-        const wavBlob = new Blob([wav.toBuffer()], { type: "audio/wav" });
-        return URL.createObjectURL(wavBlob);
-      } catch (error) {
-        console.error("Error al convertir el audio a WAV:", error);
-        return null;
-      }
+      // Crear un contexto de audio para decodificar el ArrayBuffer
+      const audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+      // Convertir el AudioBuffer a WAV
+      const wavData = await WavEncoder.encode({
+        sampleRate: audioBuffer.sampleRate,
+        channelData: Array.from(
+          { length: audioBuffer.numberOfChannels },
+          (_, i) => audioBuffer.getChannelData(i)
+        ),
+      });
+
+      // Crear un Blob de tipo 'audio/wav' con los datos WAV
+      const wavBlob = new Blob([wavData], { type: "audio/wav" });
+
+      return wavBlob;
     }
 
     async function sendToGemini() {
