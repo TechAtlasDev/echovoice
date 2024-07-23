@@ -1,48 +1,130 @@
+import { useState, useRef } from "react";
 import Message from "../components/Chat/Message";
-import { Link } from "react-router-dom";
 
 function Chat() {
-  const listMessages = [
-    { emisor: "system", text: "El chat comenzó" },
-    { emisor: "user", text: "Hola, ¿cómo estás?" },
-    {
-      emisor: "ai",
-      text: 'Como modelo de lenguaje, no tengo sentimientos ni emociones, así que no puedo decir que "estoy bien" o "estoy mal". Sin embargo, estoy aquí para ayudarte con cualquier pregunta o tarea que tengas. ¿Qué puedo hacer por ti hoy?',
-    },
-    { emisor: "user", text: "Hola, ¿cómo estás?" },
-    {
-      emisor: "ai",
-      text: 'Como modelo de lenguaje, no tengo sentimientos ni emociones, así que no puedo decir que "estoy bien" o "estoy mal". Sin embargo, estoy aquí para ayudarte con cualquier pregunta o tarea que tengas. ¿Qué puedo hacer por ti hoy?',
-    },
-  ];
+  const [isMicActive, setIsMicActive] = useState(false);
+  const [photoDataUrl, setPhotoDataUrl] = useState(null);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const audioRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+
+  async function handleMicClick(index) {
+    if (isMicActive) {
+      // Detener la grabación y tomar una foto al desactivar el micrófono
+      stopRecording();
+      const photo = await takePhoto();
+      setPhotoDataUrl(photo);
+      console.log("Foto tomada:", photo);
+    } else {
+      // Iniciar la grabación
+      startRecording();
+    }
+    setIsMicActive(!isMicActive);
+  }
+
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioRef.current = stream;
+
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.start();
+      console.log("Grabación iniciada");
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          setAudioBlob(event.data);
+        }
+      };
+    } catch (error) {
+      console.error("Error iniciando la grabación:", error);
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream
+        .getTracks()
+        .forEach((track) => track.stop());
+      mediaRecorderRef.current = null;
+      console.log("Grabación detenida");
+    }
+  }
+
+  async function takePhoto() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+      });
+      const video = document.createElement("video");
+      video.srcObject = stream;
+      video.play();
+
+      await new Promise((resolve) => (video.onloadedmetadata = resolve));
+
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const context = canvas.getContext("2d");
+      context.drawImage(video, 0, 0);
+
+      stream.getTracks().forEach((track) => track.stop());
+
+      return canvas.toDataURL("image/png");
+    } catch (error) {
+      console.error("Error tomando la foto:", error);
+    }
+  }
+
+  const microphone = (
+    <svg
+      color={isMicActive ? "white" : "black"}
+      className='w-32'
+      data-slot='icon'
+      fill='none'
+      stroke-width='1.5'
+      stroke='currentColor'
+      viewBox='0 0 24 24'
+      xmlns='http://www.w3.org/2000/svg'
+      aria-hidden='true'
+    >
+      <path
+        stroke-linecap='round'
+        stroke-linejoin='round'
+        d='M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z'
+      ></path>
+    </svg>
+  );
 
   return (
-    <section className='bg-zinc-950 flex flex-col justify-start items-center p-5 min-h-screen'>
-      <header className='mt-5 w-full'>
-        <Link to='/'>
-          <h1 className='absolute bg-red-500 p-2 rounded hover:bg-red-700'>
-            Regresar
-          </h1>
-        </Link>
-        <Link to='/'>
-          <h1 className='text-white bg-gray-900 shadow-xl rounded-lg shadow-gray-700 p-5 w-full mb-10 lg:w-80 mx-auto font-bold tracking-tight text-5xl text-center transition duration-150 hover:shadow-none hover:bg-slate-400 hover:text-black'>
-            Chat LLM
-          </h1>
-        </Link>
-      </header>
-      <div className='flex flex-col w-full mb-20 gap-4 lg:p-8'>
-        {listMessages.map((message) => (
-          <Message emisor={message.emisor} text={message.text} />
-        ))}{" "}
+    <section className='flex lg:flex-row flex-col w-screen min-h-screen p-5 bg-black'>
+      <div className='my-5 text-center'>
+        <h1 className='font-bold text-3xl'>EchoVoice</h1>
       </div>
-      <div className='fixed bottom-0 left-0 w-full bg-transparent p-4 shadow-md'>
-        <input
-          className='placeholder:italic placeholder:text-slate-400 block bg-gray-600 w-full border border-slate-500 rounded-2xl py-2 px-5 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-green-600 focus:ring-2 transition-all duration-200 sm:text-sm'
-          placeholder='Escribe algo...'
-          type='text'
-          name='inputUser'
+      <section className='flex flex-col justify-center items-center mb-10'>
+        <button
+          className={`transition-all duration-200 bg-gray-100 rounded-full p-5 ${
+            isMicActive ? "bg-red-500 " : "bg-gray-100"
+          }`}
+          onClick={() => handleMicClick(0)}
+        >
+          {microphone}
+        </button>
+        <span className='font-extrabold text-center text-xl'>
+          {isMicActive
+            ? "Presiona para detener la grabación..."
+            : "Presiona para grabar"}
+        </span>
+      </section>
+      <section className='text-xl mx-10 rounded border p-2 border-white'>
+        <Message
+          audio={audioBlob ? URL.createObjectURL(audioBlob) : null}
+          foto={photoDataUrl}
         />
-      </div>
+      </section>
     </section>
   );
 }
