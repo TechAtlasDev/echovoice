@@ -129,7 +129,7 @@ function Chat() {
   return (
     <section className='flex lg:flex-row flex-col max-w-screen min-h-screen p-5 bg-black'>
       <div className='my-5 text-center'>
-        <h1 className='font-bold text-3xl'>EchoVoice</h1>
+        <h1 className='font-bold text-3xl'>EchoVision v2</h1>
       </div>
       <section className='flex flex-col justify-center items-center mb-10'>
         <button
