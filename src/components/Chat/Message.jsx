@@ -1,5 +1,5 @@
-// Message.js
 import React, { useState, useEffect } from "react";
+import { WaveFile } from "wavefile";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 function Message({ audio, foto, initialPrompt }) {
@@ -7,6 +7,30 @@ function Message({ audio, foto, initialPrompt }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    async function convertToWav(audioUrl) {
+      try {
+        const response = await fetch(audioUrl);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBlob = new Blob([arrayBuffer], { type: "audio/ogg" });
+        const audioContext = new (window.AudioContext ||
+          window.webkitAudioContext)();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+        const wav = new WaveFile();
+        wav.fromScratch(
+          audioBuffer.numberOfChannels,
+          audioBuffer.sampleRate,
+          "16",
+          audioBuffer.getChannelData(0)
+        );
+        const wavBlob = new Blob([wav.toBuffer()], { type: "audio/wav" });
+        return URL.createObjectURL(wavBlob);
+      } catch (error) {
+        console.error("Error al convertir el audio a WAV:", error);
+        return null;
+      }
+    }
+
     async function sendToGemini() {
       if (!foto || !audio) return;
 
@@ -35,7 +59,12 @@ function Message({ audio, foto, initialPrompt }) {
 
       try {
         const imagePart = await fileToGenerativePart(foto, "image/png");
-        const audioPart = await fileToGenerativePart(audio, "audio/webm");
+        const wavAudioUrl = await convertToWav(audio);
+        if (!wavAudioUrl) {
+          throw new Error("No se pudo convertir el audio a WAV");
+        }
+        const audioPart = await fileToGenerativePart(wavAudioUrl, "audio/wav");
+        console.log("Audio: " + audioPart);
 
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
