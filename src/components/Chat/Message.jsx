@@ -89,26 +89,23 @@ function Message({ audio, foto }) {
     <div className='message'>
       {error && <p className='error'>{error}</p>}
       {aiResponse ? (
-        <div className='ai-response p-4 flex flex-col items-center'>
-          <div>
-            <h2>
-              <b>Respuesta de la IA:</b>
-            </h2>
-            <p>{aiResponse}</p>
-          </div>
-          <hr className='my-4 w-full bg-slate-500' />
-          <div className='flex gap-6'>
-            <img src={foto} alt='Captura' className='my-4 ' />
-            <div className='flex flex-col gap-3'>
-              <h2>Audio capturado:</h2>
-              <audio src={audio} controls />
-            </div>
-          </div>
-        </div>
-      ) : (
-        <p>Esperando la respuesta de la IA...</p>
-      )}
+        <div className='ai-response p-4 flex flex-col lg:items-center'>
+  <div>
+    <h2>
+      <b>Respuesta de la IA:</b>
+    </h2>
+    <p>{aiResponse}</p>
+  </div>
+  <hr className='my-4 w-full bg-slate-500' />
+  <div className='flex flex-col lg:flex-row gap-6'>
+    <img src={foto} alt='Captura' className='my-4 w-full lg:w-auto' />
+    <div className='flex flex-col gap-3 w-full lg:w-auto'>
+      <h2>Audio capturado:</h2>
+      <audio src={audio} controls className='w-full lg:w-auto' />
     </div>
+  </div>
+</div>
+
   );
 }
 
