@@ -77,6 +77,14 @@ function Message({ audio, foto, initialPrompt }) {
     sendToGemini();
   }, [audio, foto, initialPrompt]);
 
+  useEffect(() => {
+    if (aiResponse) {
+      const synth = window.speechSynthesis;
+      const utterThis = new SpeechSynthesisUtterance(aiResponse);
+      synth.speak(utterThis);
+    }
+  }, [aiResponse]);
+
   return (
     <div className='message'>
       {error && <p className='error'>{error}</p>}
