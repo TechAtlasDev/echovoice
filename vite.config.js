@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
-import fs from "fs";
 
 export default defineConfig({
   plugins: [
@@ -10,8 +9,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.png", "robots.txt"],
       manifest: {
-        name: "EchoVoice",
-        short_name: "EchoVoice",
+        name: "EchoVision",
+        short_name: "EchoVision",
         description:
           "Aplicación creada para poder asistir a personas con discapacidades visuales.",
         theme_color: "#ffffff",
