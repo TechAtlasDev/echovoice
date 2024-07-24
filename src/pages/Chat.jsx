@@ -7,9 +7,6 @@ function Chat() {
   const [photoDataUrl, setPhotoDataUrl] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
   const [aiResponse, setAiResponse] = useState(null);
-  const [initialPrompt, setInitialPrompt] = useState(
-    "Describe esta imagen y audio en español"
-  ); // Nuevo estado para el prompt
 
   const audioRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -100,7 +97,7 @@ function Chat() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ foto, audio, prompt: initialPrompt }), // Enviar el prompt al servidor
+      body: JSON.stringify({ foto, audio }),
     });
     const data = await response.json();
     return data.text; // Devuelve el texto de la respuesta de la IA
@@ -150,7 +147,6 @@ function Chat() {
         <Message
           audio={audioBlob ? URL.createObjectURL(audioBlob) : null}
           foto={photoDataUrl}
-          initialPrompt={initialPrompt} // Pasar el prompt inicial al componente Message
         />
       </section>
     </section>

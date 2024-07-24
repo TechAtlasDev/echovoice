@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-function Message({ audio, foto, initialPrompt }) {
+function Message({ audio, foto }) {
   const [aiResponse, setAiResponse] = useState(null);
   const [error, setError] = useState(null);
 
@@ -50,7 +50,7 @@ function Message({ audio, foto, initialPrompt }) {
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const prompt =
-          initialPrompt || "Describe esta imagen y audio en español";
+          'Eres un asistente que genera una descripción detallada del entorno para una persona con discapacidad visual, incluyendo:\n* **Objetos:**  [Ejemplo: identificar y describir objetos como árboles, autos, edificios, personas, etc.]\n* **Peligros:**  [Ejemplo: identificar y describir posibles peligros como semáforos en rojo, pasos de peatones, baches en el pavimento, etc.]\n* **Señales:**  [Ejemplo: identificar y describir señales de tráfico como señales de stop, límites de velocidad, etc.]\n* **Orientación Espacial:**  [Ejemplo: proporcionar información sobre la posición de la persona en relación a otros objetos, como la distancia a la acera, la posición de un semáforo, etc.]\n* **Información Adicional:**  [Ejemplo: proporcionar información adicional sobre el entorno, como "Hay un parque a tu derecha" o "El edificio a tu izquierda es un banco".]\n* **Seguridad:**  [Ejemplo: Si no hay peligros visibles, indicar que el entorno es seguro para caminar, como "La acera es segura para caminar, no hay baches visibles ni obstáculos en tu camino".].\nEvita responder con caracteres especiales, como asteriscos, comillas, simbolos, etc.';
         const requestPayload = {
           contents: [
             {
@@ -75,7 +75,7 @@ function Message({ audio, foto, initialPrompt }) {
     }
 
     sendToGemini();
-  }, [audio, foto, initialPrompt]);
+  }, [audio, foto]);
 
   useEffect(() => {
     if (aiResponse) {
