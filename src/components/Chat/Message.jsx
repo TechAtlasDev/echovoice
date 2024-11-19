@@ -9,7 +9,7 @@ function Message({ audio, foto }) {
     async function sendToGemini() {
       if (!foto || !audio) return;
 
-      const apiKey = "AIzaSyBD3pwUuwobKmxw982w4UHgGSSEt3CcCQw";
+      const apiKey = "AIzaSyB75roEJPDCPeTuvEOowrXXc0CPLro1kdY";
       const genAI = new GoogleGenerativeAI(apiKey);
 
       const dataToBase64 = async (dataUrl) => {
