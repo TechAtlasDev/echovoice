@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "echovoice"
+version = "0.1.0"
+description = ""
+authors = ["techatlasdev <srgoqui@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+google-generativeai = "^0.8.3"
+fastapi = "^0.115.5"
+uvicorn = "^0.32.1"
+python-dotenv = "^1.0.1"
+pydantic = "^2.10.2"
+python-multipart = "^0.0.19"
+
+[tool.poetry.scripts]
+dev = "echovoice:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

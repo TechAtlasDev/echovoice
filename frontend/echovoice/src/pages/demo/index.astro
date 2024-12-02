@@ -1,0 +1,13 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Interact from "./components/interact.astro";
+import Menu from "./components/menu.astro";
+---
+
+<Layout>
+	<main class="flex flex-col lg:flex-row">
+		<Interact />
+		<div class="divider lg:divider-horizontal p-10"></div>
+		<Menu />
+	</main>
+</Layout>

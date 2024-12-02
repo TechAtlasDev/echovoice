@@ -1,0 +1,17 @@
+---
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<article class="bg-base-100 collapse">
+	<input type="checkbox" />
+	<div class="collapse-title text-xl font-medium">
+		{title}
+	</div>
+	<div class="collapse-content">
+		<slot />
+	</div>
+</article>
